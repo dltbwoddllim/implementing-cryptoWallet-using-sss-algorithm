@@ -1,99 +1,82 @@
 
 const crypto = require('crypto')
 const BN = require("bn.js")
-const privateKey = new BN(crypto.randomBytes(32).toString('hex'), 16);
-const coEfficient = new BN(crypto.randomBytes(32).toString('hex'), 16);
 const bip39 = require('bip39');
 
-//Generate three points
-//y=ax+b(a : random number, b : privatekey)
-const a = coEfficient;
-const b = privateKey;
-
-//x1,x2(user input),x3 -> y1,y2,y3
-//add PBKDF2 to user input
-const userInput = "dladygks"
-// https://www.geeksforgeeks.org/node-js-crypto-pbkdf2-method/
-// crypto.pbkdf2(userInpu)
-
-const x1 = new BN(crypto.randomBytes(32).toString('hex'), 16);
-const x2 = new BN(crypto.createHash('sha256').update(userInput).digest('hex'), 16);
-const x3 = new BN(crypto.randomBytes(32).toString('hex'), 16);
-
-const y1 = b.add(a.mul(x1))
-const y2 = b.add(a.mul(x2))
-const y3 = b.add(a.mul(x3))
-
-//recover private key
-//a = (y1-y2)/(x1-x2)
-//b = (y1-ax1)
-const user_x = new BN(crypto.createHash('sha256').update(userInput).digest('hex'), 16);
-
-const co = (y1.sub(y2)).div(x1.sub(user_x))
-const recoveryPrivateKey = y1.sub(co.mul(x1))
-console.log(privateKey);
-console.log(recoveryPrivateKey);
-
-//generate mnemonics
-const mnemonic = bip39.entropyToMnemonic(privateKey.toBuffer());
-console.log(mnemonic);
-
-//RSA encryption using x2(PBKDF2)'s pubKey or symmetrics encrpytion.
+export class manageKey {
+    constructor() {
+        this.point_1 = new points(new BN(0), new BN(0));
+        this.point_2 = new points(new BN(0), new BN(0));
+        this.point_3 = new points(new BN(0), new BN(0));
+        this.coEfficient = new BN(0);
+        this.privateKey = new BN(0);
+        this.userInput = "";
+    }
 
 
-// -----------------------------------------
-// class points {
-//     constructor(x, y) {
-//       this.X = x;
-//       this.Y = y;
-//     }
-//   }
+    //generate PrivateKey
+    genPrivateKey() {
+        this.privateKey = new BN(crypto.randomBytes(32).toString('hex'), 16);
+        return this.privateKey;
+    }
 
-// class manageKey {
-//     constructor(){
+    //generate points that be used in recovering PrivateKey
+    genPoints() {
+        this.point_1.X = new BN(crypto.randomBytes(32).toString('hex'), 16);
+        this.point_2.X = new BN(crypto.createHash('sha256').update(this.userInput).digest('hex'), 16);
+        this.point_3.X = new BN(crypto.randomBytes(32).toString('hex'), 16);
 
-//     }
-// function genPrivateKey(){
-//     return new BN(crypto.randomBytes(32).toString('hex'), 16);
-// }
+        this.point_1.Y = this.privateKey.add(this.coEfficient.mul(this.point_1.X))
+        this.point_2.Y = this.privateKey.add(this.coEfficient.mul(this.point_2.X))
+        this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
 
-// function genPoints(privateKey){
-//     const coEfficient = new BN(crypto.randomBytes(32).toString('hex'), 16);
-//     const x1 = new BN(crypto.randomBytes(32).toString('hex'), 16);
-//     const x2 = new BN(crypto.randomBytes(32).toString('hex'), 16);
-//     const x3 = new BN(crypto.randomBytes(32).toString('hex'), 16);
+        return
+    }
+    //manage 
+    encryptPoint(point){
+        var RSAPubKey = new crypto.createPublicKey(this.point_2.X .toBuffer);
+        var encryptedPoint = crypto.publicEncrypt(RSAPubKey, point.toBuffer())
+        return encryptedPoint
+    }
 
-//     const y1 = b.add(a.mul(x1))
-//     const y2 = b.add(a.mul(x2))
-//     const y3 = b.add(a.mul(x3))
+    decryptPoint(encryptedPoint){
+        var RSAPrivKey = new crypto.createPrivateKey(this.point_2.X .toBuffer);
+        var decryptedPoint = crypto.publicDecrypt(RSAPrivKey,encryptedPoint)
+        return decryptedPoint
+    }
+    // saveAtLocal() {
 
+    // }
 
-//     return 
-// }
+    // saveAtDrive() {
 
-// function saveAtLocal(point){
+    // }
 
-// }
+    // getPointFromLocal() {
 
-// function saveAtDrive(point){
-
-// }
-
-//     function getPointFromLocal() {
-
-//     }
-
-
-//     function getPointFromDrive() {
-
-//     }
+    // }
 
 
-//     function getUserInput() {
+    // getPointFromDrive() {
 
-//     }
+    // }
 
-//     function recoveryPrivateKey(point_1, point_2) {
 
-//     }
-// }
+    // getUserInput() {
+
+    // }
+
+    recoveryPrivateKey(point_1, point_2) {
+        const co = (point_1.Y.sub(point_2.Y)).div(point_1.X.sub(point_2.X))
+        this.privateKey = point_1.Y.sub(co.mul(point_1.X))
+        return this.privateKey
+    }   
+}
+
+class points {
+    constructor(x, y) {
+        this.X = x;
+        this.Y = y;
+    }
+
+}
