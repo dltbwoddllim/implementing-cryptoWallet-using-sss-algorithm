@@ -1,7 +1,8 @@
-import { manageKey } from "./Mkey.js";
-import crypto from 'crypto';
-import BN from 'bn.js';
-var Mkey = new manageKey()
+const crypto = require('crypto');
+const BN = require('bn.js');
+const manageKey = require("./Mkey.js");
+
+var Mkey = new manageKey();
 var PrivKey = Mkey.genPrivateKey();
 
 Mkey.genPoints();
