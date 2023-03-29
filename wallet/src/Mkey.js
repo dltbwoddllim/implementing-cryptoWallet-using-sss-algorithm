@@ -1,8 +1,8 @@
-import crypto from 'crypto'
+// import crypto from 'crypto-js'
 import BN from 'bn.js';
-import util from 'util';
+// import util from 'util';
 
-const pbkdf2Async = util.promisify(crypto.pbkdf2);
+// const pbkdf2Async = util.promisify(crypto.pbkdf2);
 
 export class manageKey {
     constructor() {
@@ -11,29 +11,54 @@ export class manageKey {
         this.point_3 = new points(new BN(0), new BN(0));
         this.coEfficient = new BN(0);
         this.privateKey = new BN(0);
+        this.recoverykey = new BN(0);
         this.userInput = "";
     }
 
-
     //generate PrivateKey
     genPrivateKey() {
-        crypto.randomBytes
-        this.privateKey = new BN(crypto.randomBytes(32).toString('hex'), 16);
+        const randomBytes = new Uint8Array(32);
+        crypto.getRandomValues(randomBytes);
+        this.privateKey = new BN(randomBytes, 16);
         return this.privateKey;
     }
 
     //generate points that be used in recovering PrivateKey
     genPoints() {
-        this.point_1.X = new BN(crypto.randomBytes(32).toString('hex'), 16);
-        this.point_2.X = new BN(crypto.createHash('sha256').update(this.userInput).digest('hex'), 16);
-        this.point_3.X = new BN(crypto.randomBytes(32).toString('hex'), 16);
+        const randomBytes_1 = new Uint8Array(32);
+        const randomBytes_2 = new Uint8Array(32);
+        crypto.getRandomValues(randomBytes_1);
+        crypto.getRandomValues(randomBytes_2);
+
+        this.point_1.X = new BN(randomBytes_1, 16);
+        this.point_2.X = new BN(randomBytes_2, 16);
+        // this.point_3.X = new BN(this.digestMessage(this.userInput), 16);
 
         this.point_1.Y = this.privateKey.add(this.coEfficient.mul(this.point_1.X))
         this.point_2.Y = this.privateKey.add(this.coEfficient.mul(this.point_2.X))
-        this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
+        // this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
 
         return
     }
+    
+    //recovery privateKey by points
+    recoveryPrivateKey(point_1, point_2) {
+        const co = (point_1.Y.sub(point_2.Y)).div(point_1.X.sub(point_2.X))
+        this.recoverykey = point_1.Y.sub(co.mul(point_1.X))
+        return this.recoverykey
+    }
+
+    //Input value
+    userPoint_xInput(inputValue){
+        this.digestMessage(inputValue).then((hash)=>
+        {
+            const result = new Uint8Array(hash)
+            this.point_3.X = new BN(result);
+            console.log(this.point_3.X);
+            this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
+        })
+    }
+
 
     // async encryptPointAsync(password, dataToEncrypt) {
     //     const salt = crypto.randomBytes(32); // generate a random salt
@@ -60,12 +85,14 @@ export class manageKey {
 
     //     return decrypted;
     // }
+    
+    async digestMessage(message) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(message);
+        const hash = await crypto.subtle.digest("SHA-256", data);
+        return hash;
+      }
 
-    recoveryPrivateKey(point_1, point_2) {
-        const co = (point_1.Y.sub(point_2.Y)).div(point_1.X.sub(point_2.X))
-        this.privateKey = point_1.Y.sub(co.mul(point_1.X))
-        return this.privateKey
-    }
 }
 
 class points {
