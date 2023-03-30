@@ -1,8 +1,4 @@
-// import crypto from 'crypto-js'
 import BN from 'bn.js';
-// import util from 'util';
-
-// const pbkdf2Async = util.promisify(crypto.pbkdf2);
 
 export class manageKey {
     constructor() {
@@ -54,38 +50,11 @@ export class manageKey {
         {
             const result = new Uint8Array(hash)
             this.point_3.X = new BN(result);
-            console.log(this.point_3.X);
+            // console.log(this.point_3.X);
             this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
         })
     }
 
-
-    // async encryptPointAsync(password, dataToEncrypt) {
-    //     const salt = crypto.randomBytes(32); // generate a random salt
-    //     const iterations = 100000; // number of iterations
-    //     const keyLength = 256; // key length in bits
-
-    //     const derivedKey = await pbkdf2Async(password, salt, iterations, keyLength, 'sha256');
-    //     const cipher = crypto.createCipher('aes-256-cbc', derivedKey);
-    //     let encrypted = cipher.update(dataToEncrypt, 'utf8', 'hex');
-    //     encrypted += cipher.final('hex');
-
-    //     return { salt, encryptedData: encrypted };
-    // }
-
-    // async decryptPointAsync(password, encryptedData) {
-    //     const { salt, encryptedData: encrypted } = encryptedData;
-    //     const iterations = 100000; // number of iterations
-    //     const keyLength = 256; // key length in bits
-
-    //     const derivedKey = await pbkdf2Async(password, salt, iterations, keyLength, 'sha256');
-    //     const decipher = crypto.createDecipher('aes-256-cbc', derivedKey);
-    //     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    //     decrypted += decipher.final('utf8');
-
-    //     return decrypted;
-    // }
-    
     async digestMessage(message) {
         const encoder = new TextEncoder();
         const data = encoder.encode(message);
