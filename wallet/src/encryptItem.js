@@ -47,7 +47,6 @@ export class encryptItem {
         let keyMaterial = await this.getKeyMaterial(this.password);
         let key = await this.getKey(keyMaterial, this.salt);
         let encoded = this.getMessageEncoding(point);
-        // console.log(key);
         this.ciphertext = await crypto.subtle.encrypt(
             {
                 name: "AES-GCM",
@@ -57,14 +56,11 @@ export class encryptItem {
             encoded
         );
 
-        // let buffer = new Uint8Array(this.ciphertext, 0, 5);
-        // console.log(this.ciphertext);
         return this.ciphertext
     }
 
-    async decrypt(encryptedPoint, pw) {
-        console.log(pw)
-        let keyMaterial = await this.getKeyMaterial(pw);
+    async decrypt(encryptedPoint) {
+        let keyMaterial = await this.getKeyMaterial();
         let key = await this.getKey(keyMaterial, this.salt);
 
         try {
@@ -76,7 +72,6 @@ export class encryptItem {
                 key,
                 encryptedPoint
             );
-            console.log(decrypted)
             let dec = new TextDecoder();
             return dec.decode(decrypted)
         } catch (e) {
@@ -84,10 +79,3 @@ export class encryptItem {
         }
     }
 }
-// import BN from 'bn.js';
-
-// var point = new BN(0).toString();
-// var password = "dladygks112-";
-
-
-// encrypt(password,point)
