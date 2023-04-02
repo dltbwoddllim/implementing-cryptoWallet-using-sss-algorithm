@@ -1,18 +1,16 @@
 <!-- todo
-  1. 핵심 함수들 다 최소 단위로 쪼개서 만들기
-  2. 유저 플로우를 기준으로 기능 구현하기.(props사용 데이터 주고 받기.)
+
  -->
 
 <script>
 // import { inject } from 'vue'
 // import Test from './components/TestEx.vue'
-
+import BN from 'bn.js';
 import { manageKey } from './Mkey.js';
 const myMkey = new manageKey();
 console.log(myMkey);
 import { encryptItem } from './encryptItem.js'
 const myencryptItem = new encryptItem();
-
 
 export default {
   // setup() {
@@ -36,6 +34,11 @@ export default {
       cypherPoint: ""
     }
   },
+  mounted() {
+    const script = document.createElement('script')
+    script.src = 'https://apis.google.com/js/api.js'
+    document.head.appendChild(script)
+  },
   methods: {
     // increment() {
     //   // 컴포넌트의 count 상태 업데이트
@@ -44,7 +47,7 @@ export default {
     // },
     genprivKey() {
       myMkey.genPrivateKey()
-      // console.log(myMkey.privateKey.toJSON())
+      console.log(myMkey.privateKey.toJSON())
     },
     genPoints() {
       myMkey.genPoints()
@@ -88,7 +91,7 @@ export default {
     decryptPoint() {
       console.log(this.password_2)
       myencryptItem.setPassword(this.password_2);
-      myencryptItem.decrypt(this.cypherPoint, this.password_2).then((result) => {
+      myencryptItem.decrypt(this.cypherPoint).then((result) => {
         console.log(result);
         console.log(myMkey.point_1.X.toString())
       })
@@ -109,29 +112,48 @@ export default {
     attatchFromlocalstorage() {
       const serializedData = localStorage.getItem('encryptDatas')
       const encryptDatas = JSON.parse(serializedData);
-      console.log(encryptDatas.iv);
-      console.log(encryptDatas.salt);
-      console.log(encryptDatas.encryptData);
-      // const encoder = new TextEncoder();
-      // const ivObject = JSON.stringify(encryptDatas.iv);
-      // const saltObject = JSON.stringify(encryptDatas.salt);
-      // myencryptItem.iv = encoder.encode(ivObject);
-      // myencryptItem.salt = encoder.encode(saltObject);
 
-      const arrayBuffer = new ArrayBuffer(encryptDatas.encryptData.length)
-      const bufferView = new ArrayBuffer(arrayBuffer);
-      
-      // console.log(encoder.encode(ivObject));
-      // console.log(encoder.encode(ivObject));
-      // console.log(bufferView);
+      var uint8Arr1 = new Uint8Array(Object.keys(encryptDatas.iv).length);
+      var uint8Arr2 = new Uint8Array(Object.keys(encryptDatas.salt).length);
+      var uint8Arr3 = new Uint8Array(Object.keys(encryptDatas.encryptData).length);
+      for (var i = 0; i < uint8Arr1.length; i++) {
+        uint8Arr1[i] = encryptDatas.iv[i]
+      }
+      for (var j = 0; j < uint8Arr2.length; j++) {
+        uint8Arr2[j] = encryptDatas.salt[j]
+      }
+      for (var t = 0; t < uint8Arr3.length; t++) {
+        uint8Arr3[t] = encryptDatas.encryptData[t]
+      }
 
-      // console.log(myencryptItem .iv);
-      // console.log(myencryptItem.salt);
-      myencryptItem.decrypt(bufferView).then((result) => {
-        console.log(result);
+      myencryptItem.iv = uint8Arr1
+      myencryptItem.salt = uint8Arr2
+      myencryptItem.decrypt(uint8Arr3).then((result) => {
+        const privateKey = new BN(result);
+        console.log(privateKey.toJSON())
         console.log(myMkey.privateKey.toJSON())
       })
+    },
+    pointJsonData() {
+      const encryptDatas = new Array(3);
+      const points = [myMkey.point_2.Y, myMkey.point_3.X, myMkey.point_3.Y];
+      myencryptItem.encryptBatch(points).then((results) => {
+        for (var i = 0; i < results.length; i++) {
+          encryptDatas[i] = results[i]
+        }
+  // json 구글 드라이브 업로드 파트.
+      })
+    },
+    uploadToDrive() {
+
     }
+    // objectTouint8Array(data){
+    //   var uint8Arr = new Uint8Array(Object.keys(data).length);
+    //   for(var i = 0; i<iv.length; i++){
+    //     uint8Arr[i] = data[i]
+    //   }
+    //   return uint8Arr
+    // }
     // created() {
 
     // }
@@ -158,6 +180,6 @@ export default {
   <button @click="decryptPoint">decryptPoint</button><br>
   <button @click="saveTolocalstorage">saveTolocalstorage</button><br>
   <button @click="attatchFromlocalstorage">attatchFromlocalstorage</button><br>
-  
+  <button @click="pointJsonData">pointJsonData</button><br>
 
 </template>

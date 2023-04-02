@@ -6,7 +6,7 @@ export class encryptItem {
         this.iv = crypto.getRandomValues(new Uint8Array(12));
     }
 
-    setPassword(pw){
+    setPassword(pw) {
         this.password = pw;
         return this.password;
     }
@@ -77,5 +77,47 @@ export class encryptItem {
         } catch (e) {
             console.log(e)
         }
+    }
+
+    async encryptBatch(points) {
+        let keyMaterial = await this.getKeyMaterial(this.password);
+        let key = await this.getKey(keyMaterial, this.salt);
+        let results = new Array(3);
+        for (var i = 0; i < points.length; i++) {
+            let encoded = this.getMessageEncoding(points[i]);
+            let ciphertext = await crypto.subtle.encrypt(
+                {
+                    name: "AES-GCM",
+                    iv: this.iv
+                },
+                key,
+                encoded
+            );
+            results[i] = ciphertext;
+        }
+        return results
+    }
+
+    async decryptBatch(encryptedPoints) {
+        let keyMaterial = await this.getKeyMaterial();
+        let key = await this.getKey(keyMaterial, this.salt);
+        let results = new Array(3);
+        for (var i = 0; i < encryptedPoints.length; i++) {
+            try {
+                let decrypted = await crypto.subtle.decrypt(
+                    {
+                        name: "AES-GCM",
+                        iv: this.iv
+                    },
+                    key,
+                    encryptedPoints[i]
+                );
+                let dec = new TextDecoder();
+                results[i] = dec.decode(decrypted)
+            } catch (e) {
+                console.log(e)
+            }
+        }
+        return results
     }
 }

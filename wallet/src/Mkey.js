@@ -15,7 +15,10 @@ export class manageKey {
     genPrivateKey() {
         const randomBytes = new Uint8Array(32);
         crypto.getRandomValues(randomBytes);
+        const randomBytes_2 = new Uint8Array(32);
+        crypto.getRandomValues(randomBytes_2);
         this.privateKey = new BN(randomBytes, 16);
+        this.coEfficient = new BN(randomBytes_2,16);
         return this.privateKey;
     }
 
@@ -28,11 +31,9 @@ export class manageKey {
 
         this.point_1.X = new BN(randomBytes_1, 16);
         this.point_2.X = new BN(randomBytes_2, 16);
-        // this.point_3.X = new BN(this.digestMessage(this.userInput), 16);
 
         this.point_1.Y = this.privateKey.add(this.coEfficient.mul(this.point_1.X))
         this.point_2.Y = this.privateKey.add(this.coEfficient.mul(this.point_2.X))
-        // this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
 
         return
     }
@@ -50,7 +51,6 @@ export class manageKey {
         {
             const result = new Uint8Array(hash)
             this.point_3.X = new BN(result);
-            // console.log(this.point_3.X);
             this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
         })
     }
