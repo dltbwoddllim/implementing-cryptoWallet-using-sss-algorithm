@@ -12,6 +12,9 @@ console.log(myMkey);
 import { encryptItem } from './encryptItem.js'
 const myencryptItem = new encryptItem();
 
+var pvCheck = false;
+if(localStorage.getItem('encryptDatas')==null) pvCheck = true;
+
 export default {
   // setup() {
   //   const cryoptojs = inject('cryptojs')
@@ -31,13 +34,15 @@ export default {
       point_3_x: '',
       password: "",
       password_2: "",
-      cypherPoint: ""
+      cypherPoint: "",
+      PvNotExist : false,
+      privateKey : ""
     }
   },
   mounted() {
-    const script = document.createElement('script')
-    script.src = 'https://apis.google.com/js/api.js'
-    document.head.appendChild(script)
+    if (pvCheck) {
+      this.PvNotExist = true
+    }
   },
   methods: {
     // increment() {
@@ -47,6 +52,7 @@ export default {
     // },
     genprivKey() {
       myMkey.genPrivateKey()
+      this.privateKey = myMkey.privateKey.toJSON()
       console.log(myMkey.privateKey.toJSON())
     },
     genPoints() {
@@ -89,12 +95,12 @@ export default {
       })
     },
     decryptPoint() {
-      console.log(this.password_2)
+      console.log(this.password_2);
       myencryptItem.setPassword(this.password_2);
       myencryptItem.decrypt(this.cypherPoint).then((result) => {
         console.log(result);
         console.log(myMkey.point_1.X.toString())
-      })
+      });
     },
     saveTolocalstorage() {
       myencryptItem.encrypt(myMkey.privateKey).then((result) => {
@@ -162,6 +168,39 @@ export default {
 </script>
 
 <template>
+
+<button v-if="PvNotExist" @click="genprivKey">genprivKey</button><br>
+<p>{{privateKey}}</p>
+<button v-if="PvNotExist" @click="genPoints">genPoints</button><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
     <!-- <Test /> -->
   <div>{{ message }}</div>
   <button @click="genprivKey">genprivKey</button><br>
