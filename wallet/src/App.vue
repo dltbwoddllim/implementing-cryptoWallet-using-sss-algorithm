@@ -12,8 +12,8 @@ console.log(myMkey);
 import { encryptItem } from './encryptItem.js'
 const myencryptItem = new encryptItem();
 
-var pvCheck = false;
-if(localStorage.getItem('encryptDatas')==null) pvCheck = true;
+var initpage = 0
+if(localStorage.getItem('encryptDatas')==null) initpage = 1;
 
 export default {
   // setup() {
@@ -36,13 +36,12 @@ export default {
       password_2: "",
       cypherPoint: "",
       PvNotExist : false,
-      privateKey : ""
+      privateKey : "",
+      initpage : initpage
     }
   },
   mounted() {
-    if (pvCheck) {
-      this.PvNotExist = true
-    }
+
   },
   methods: {
     // increment() {
@@ -54,6 +53,7 @@ export default {
       myMkey.genPrivateKey()
       this.privateKey = myMkey.privateKey.toJSON()
       console.log(myMkey.privateKey.toJSON())
+      this.initpage = 2;
     },
     genPoints() {
       myMkey.genPoints()
@@ -166,10 +166,24 @@ export default {
   }
 }
 </script>
-
 <template>
-
-<button v-if="PvNotExist" @click="genprivKey">genprivKey</button><br>
+<div v-if="this.initpage==1">
+  <button @click="genprivKey">genprivKey</button><br>
+</div>
+<div v-else-if="this.initpage==2">
+  <input :value="point_3_x" @input="onInput" placeholder="여기에 입력하기"><button @click="inputValuePass">onInput</button><br>
+  <button @click="recovery">recovery</button>
+</div>
+<div v-else-if="this.initpage==3">
+  <input :value="password" @input="onPassword" placeholder="다른 기기에서 복구 시 사용할 비밀번호를 입력해주세요"><br>
+  <button @click="inputPwPass">onPassword</button><br>
+  </div>
+<div v-else-if="this.initpage==4">
+</div>
+<div v-else>
+  5
+</div>
+<button v-if="initpage==1" @click="genprivKey">genprivKey</button><br>
 <p>{{privateKey}}</p>
 <button v-if="PvNotExist" @click="genPoints">genPoints</button><br>
 <br>
