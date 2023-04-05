@@ -13,8 +13,9 @@ import { encryptItem } from './encryptItem.js'
 const myencryptItem = new encryptItem();
 
 var initpage = 0
-if(localStorage.getItem('encryptDatas')==null) initpage = 1;
-
+if(localStorage.getItem('encryptDatas')==null) {
+  initpage = 1;
+}
 export default {
   // setup() {
   //   const cryoptojs = inject('cryptojs')
@@ -37,7 +38,8 @@ export default {
       cypherPoint: "",
       PvNotExist : false,
       privateKey : "",
-      initpage : initpage
+      initpage : initpage,
+      jsonfile : ""
     }
   },
   mounted() {
@@ -69,10 +71,12 @@ export default {
     inputValuePass() {
       console.log(this.point_3_x)
       myMkey.userPoint_xInput(this.point_3_x);
+      this.initpage = 3
     },
     inputPwPass() {
       myencryptItem.setPassword(this.password);
       console.log(myencryptItem.password);
+      this.initpage = 4
     },
     inputPw2Pass() {
       console.log(this.password_2);
@@ -147,6 +151,7 @@ export default {
         for (var i = 0; i < results.length; i++) {
           encryptDatas[i] = results[i]
         }
+        this.jsonfile = encryptDatas
   // json 구글 드라이브 업로드 파트.
       })
     },
@@ -172,20 +177,17 @@ export default {
 </div>
 <div v-else-if="this.initpage==2">
   <input :value="point_3_x" @input="onInput" placeholder="여기에 입력하기"><button @click="inputValuePass">onInput</button><br>
-  <button @click="recovery">recovery</button>
 </div>
 <div v-else-if="this.initpage==3">
   <input :value="password" @input="onPassword" placeholder="다른 기기에서 복구 시 사용할 비밀번호를 입력해주세요"><br>
   <button @click="inputPwPass">onPassword</button><br>
   </div>
-<div v-else-if="this.initpage==4">
+<div v-else-if="this.initpage==4" >
+  <button @click="pointJsonData">복구 데이터 생성</button>
+  {{ jsonfile }}
 </div>
 <div v-else>
-  5
 </div>
-<button v-if="initpage==1" @click="genprivKey">genprivKey</button><br>
-<p>{{privateKey}}</p>
-<button v-if="PvNotExist" @click="genPoints">genPoints</button><br>
 <br>
 <br>
 <br>
