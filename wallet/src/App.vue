@@ -101,15 +101,65 @@ export default {
       })
     },
     pointJsonData() {
-      const encryptDatas = new Array(3);
+      const encryptDatas = {
+          salt: myencryptItem.salt,
+          iv: myencryptItem.iv,
+          point_2_Y: "",
+          point_3_X: "",
+          point_3_Y: ""
+      }
       const points = [myMkey.point_2.Y, myMkey.point_3.X, myMkey.point_3.Y];
       myencryptItem.encryptBatch(points).then((results) => {
         for (var i = 0; i < results.length; i++) {
-          encryptDatas[i] = results[i]
+          console.log(results[i])
+          points[i] = new Uint8Array(results[i])
         }
-        this.jsonfile = encryptDatas
-        // json 구글 드라이브 업로드 파트.
+      }).then(() => {
+        encryptDatas['point_2_Y'] = points[0];
+        encryptDatas['point_3_X'] = points[1];
+        encryptDatas['point_3_Y'] = points[2];
+        const serializedData = JSON.stringify(encryptDatas)
+        this.jsonfile = serializedData
+        console.log(this.jsonfile)
+
+        // decrypto part
+        const encryptDatass = JSON.parse(this.jsonfile);
+        console.log(encryptDatass)
+        var uint8Arr1 = new Uint8Array(Object.keys(encryptDatass.iv).length);
+        var uint8Arr2 = new Uint8Array(Object.keys(encryptDatass.salt).length);
+        var uint8Arr3 = new Uint8Array(Object.keys(encryptDatass.point_2_Y).length);
+        var uint8Arr4 = new Uint8Array(Object.keys(encryptDatass.point_3_X).length);
+        var uint8Arr5 = new Uint8Array(Object.keys(encryptDatass.point_3_Y).length);
+
+        for (var i = 0; i < uint8Arr1.length; i++) {
+          uint8Arr1[i] = encryptDatass.iv[i]
+        }
+        for (var j = 0; j < uint8Arr2.length; j++) {
+          uint8Arr2[j] = encryptDatass.salt[j]
+        }
+        for (var t = 0; t < uint8Arr3.length; t++) {
+          uint8Arr3[t] = encryptDatass.point_2_Y[t]
+        }
+        for (var k = 0; k < uint8Arr4.length; k++) {
+          uint8Arr4[k] = encryptDatass.point_3_X[k]
+        }
+        for (var p = 0; t < uint8Arr5.length; p++) {
+          uint8Arr5[p] = encryptDatass.point_3_Y[p]
+        }
+
+        myencryptItem.iv = uint8Arr1
+        myencryptItem.salt = uint8Arr2
+        myencryptItem.decryptBatch([uint8Arr3,uint8Arr4,uint8Arr5]).then((results) => {
+          console.log(results);
+          myMkey.point_2.Y = new BN(results[0])
+          myMkey.point_3.X = new BN(results[1])
+          myMkey.point_3.Y = new BN(results[2])
+          console.log(myMkey.point_2.Y)
+          console.log(myMkey.point_3.X)
+          console.log(myMkey.point_3.Y)
+        })
       })
+
     },
     goTohome() {
       this.initpage = 6;
