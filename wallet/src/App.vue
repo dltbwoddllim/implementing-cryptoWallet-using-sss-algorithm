@@ -46,7 +46,7 @@ export default {
       // console.log(myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3).toJSON());
     },
     inputValuePass() {
-      myMkey.userPoint_xInput(this.point_3_x);
+      myMkey.userPoint_xInputGenerateY(this.point_3_x);
       this.initpage = 3
     },
     inputPwPass() {
@@ -122,7 +122,7 @@ export default {
         this.jsonfile = serializedData
         console.log(this.jsonfile)
 
-        // decrypto part
+        // decrypt part
         const encryptDatass = JSON.parse(this.jsonfile);
         console.log(encryptDatass)
         var uint8Arr1 = new Uint8Array(Object.keys(encryptDatass.iv).length);
@@ -143,9 +143,13 @@ export default {
         for (var k = 0; k < uint8Arr4.length; k++) {
           uint8Arr4[k] = encryptDatass.point_3_X[k]
         }
-        for (var p = 0; t < uint8Arr5.length; p++) {
+        for (var p = 0; p < uint8Arr5.length; p++) {
           uint8Arr5[p] = encryptDatass.point_3_Y[p]
         }
+
+        console.log(uint8Arr3)
+        console.log(uint8Arr4)
+        console.log(uint8Arr5)
 
         myencryptItem.iv = uint8Arr1
         myencryptItem.salt = uint8Arr2
@@ -157,6 +161,10 @@ export default {
           console.log(myMkey.point_2.Y)
           console.log(myMkey.point_3.X)
           console.log(myMkey.point_3.Y)
+          myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
+          console.log(myMkey.recoverykey.toJSON())
+          console.log(myMkey.privateKey.toJSON())
+          
         })
       })
 

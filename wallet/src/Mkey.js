@@ -46,7 +46,7 @@ export class manageKey {
     }
 
     //Input value
-    userPoint_xInput(inputValue){
+    userPoint_xInputGenerateY(inputValue){
         this.digestMessage(inputValue).then((hash)=>
         {
             const result = new Uint8Array(hash)
@@ -54,6 +54,8 @@ export class manageKey {
             this.point_3.Y = this.privateKey.add(this.coEfficient.mul(this.point_3.X))
         })
     }
+
+    // userPoint_xInput
 
     async digestMessage(message) {
         const encoder = new TextEncoder();
