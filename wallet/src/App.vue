@@ -31,7 +31,8 @@ export default {
       address: "",
       recoveryJsonFile: "",
       amount:0,
-      toAddress : ""
+      toAddress : "",
+      pageIndex : ""
     }
   },
   methods: {
@@ -269,6 +270,31 @@ export default {
 }
 </script>
 <template>
+  <div v-if="this.pageIndex == 'init'">
+    <!-- 개인키 생성, 로컬 스토리지, josn 선택 -->
+    <button @click="page">genprivKey</button><br>
+
+  </div>
+  <!-- 개인키 생성 -->
+  <div v-else-if="this.pageIndex == 'genprivateKey'">
+    <!-- 개인키 생성 버튼
+        point3_x 입력
+        비밀번호 입력 -->
+  </div>
+  <div v-else-if="this.pageIndex == 'RecoveryBylocalStorage'">
+  <!-- 
+    비밀번호 입력
+   -->
+  </div>
+  <div v-else-if="this.pageIndex == 'RecoveryByJson'">
+  <!-- 
+    point3_x
+    비밀번호
+    json입력
+   -->
+  </div>
+  <div v-else-if="this.pageIndex == 'home'"></div>
+
   <div v-if="this.initpage == 1">
     <button @click="genprivKey">genprivKey</button><br>
     <button @click="recovery">recovery</button><br>
