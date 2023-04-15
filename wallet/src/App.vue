@@ -7,7 +7,7 @@ import Web3 from 'web3';
 
 const myMkey = new manageKey();
 const myencryptItem = new encryptItem();
-const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
+const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
 
 var initpage = 0
 if (localStorage.getItem('encryptDatas') == null) {
@@ -29,7 +29,9 @@ export default {
       jsonfile: "",
       ethbalance: 0,
       address: "",
-      recoveryJsonFile: ""
+      recoveryJsonFile: "",
+      amount:0,
+      toAddress : ""
     }
   },
   methods: {
@@ -42,9 +44,7 @@ export default {
       myMkey.genPoints()
     },
     recovery() {
-      // console.log(myMkey.recoveryPrivateKey(myMkey.point_1, myMkey.point_2).toJSON());
-      // console.log(myMkey.recoveryPrivateKey(myMkey.point_1, myMkey.point_3).toJSON());
-      // console.log(myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3).toJSON());
+      this.initpage = 5;
     },
     inputValuePass() {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
@@ -64,6 +64,13 @@ export default {
     },
     onInput(e) {
       this.point_3_x = e.target.value
+    },
+    onAmount(e){
+      this.amount = e.target.value
+    },
+    ontoAddress(e){
+      this.toAddress = e.target.value
+
     },
     onPassword(e) {
       this.password = e.target.value
@@ -226,8 +233,25 @@ export default {
     async getAddress() {
       const account = web3.eth.accounts.privateKeyToAccount(myMkey.privateKey.toJSON());
       this.address = account.address;
-      this.ethbalance = await web3.eth.getBalance(this.address);
+      const balanceInWei = await web3.eth.getBalance(this.address);
+      this.ethbalance = web3.utils.fromWei(balanceInWei, 'ether');
+
     },
+    async sendTx() {
+      const to = this.toAddress;
+      const amount = web3.utils.toWei(this.amount, 'ether');
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 21000;
+      const txData = {
+        to: to,
+        value: amount,
+        gasPrice: gasPrice,
+        gas: gasLimit
+      };
+      const signedTx = await web3.eth.accounts.signTransaction(txData, myMkey.privateKey.toJSON());
+      const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+      console.log('Transaction receipt:', txReceipt);
+    }
     // encryptPoint() {
     //   myencryptItem.encrypt(myMkey.point_1.X).then((result) => {
     //     this.cypherPoint = result
@@ -247,6 +271,7 @@ export default {
 <template>
   <div v-if="this.initpage == 1">
     <button @click="genprivKey">genprivKey</button><br>
+    <button @click="recovery">recovery</button><br>
   </div>
   <div v-else-if="this.initpage == 2">
     <button @click="genPoints">genPoints</button><br>
@@ -273,6 +298,8 @@ export default {
   <div v-else>
     <p>주소 : {{ address }}</p>
     <p>eth : {{ ethbalance }}</p>
+    <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
+    <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
     <div>
 
     </div>
