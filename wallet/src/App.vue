@@ -63,12 +63,12 @@ export default {
     },
     inputPwPass() {
       myencryptItem.setPassword(this.password);
-      if (this.initpage == 5) {
-        this.attatchFromlocalstorage()
-      } else {
-        this.saveTolocalstorage();
-        this.initpage = 4
-      }
+      // if (this.initpage == 5) {
+      //   this.attatchFromlocalstorage()
+      // } else {
+      //   this.saveTolocalstorage();
+      //   this.initpage = 4
+      // }
     },
     onInput(e) {
       this.point_3_x = e.target.value
@@ -149,8 +149,8 @@ export default {
         console.log(encryptDatass)
         var uint8Arr1 = new Uint8Array(Object.keys(encryptDatass.iv).length);
         var uint8Arr2 = new Uint8Array(Object.keys(encryptDatass.salt).length);
-        var uint8Arr3 = new Uint8Array(Object.keys(encryptDatass.point_2_Y).length);
-        var uint8Arr4 = new Uint8Array(Object.keys(encryptDatass.point_3_X).length);
+        var uint8Arr3 = new Uint8Array(Object.keys(encryptDatass.point_2_X).length);
+        var uint8Arr4 = new Uint8Array(Object.keys(encryptDatass.point_2_Y).length);
         var uint8Arr5 = new Uint8Array(Object.keys(encryptDatass.point_3_Y).length);
 
         for (var i = 0; i < uint8Arr1.length; i++) {
@@ -160,10 +160,10 @@ export default {
           uint8Arr2[j] = encryptDatass.salt[j]
         }
         for (var t = 0; t < uint8Arr3.length; t++) {
-          uint8Arr3[t] = encryptDatass.point_2_Y[t]
+          uint8Arr3[t] = encryptDatass.point_2_X[t]
         }
         for (var k = 0; k < uint8Arr4.length; k++) {
-          uint8Arr4[k] = encryptDatass.point_3_X[k]
+          uint8Arr4[k] = encryptDatass.point_2_Y[k]
         }
         for (var p = 0; p < uint8Arr5.length; p++) {
           uint8Arr5[p] = encryptDatass.point_3_Y[p]
@@ -177,11 +177,11 @@ export default {
         myencryptItem.salt = uint8Arr2
         myencryptItem.decryptBatch([uint8Arr3, uint8Arr4, uint8Arr5]).then((results) => {
           console.log(results);
-          myMkey.point_2.Y = new BN(results[0])
-          myMkey.point_3.X = new BN(results[1])
+          myMkey.point_2.X = new BN(results[0])
+          myMkey.point_2.Y = new BN(results[1])
           myMkey.point_3.Y = new BN(results[2])
+          console.log(myMkey.point_2.X)
           console.log(myMkey.point_2.Y)
-          console.log(myMkey.point_3.X)
           console.log(myMkey.point_3.Y)
           myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
           console.log(myMkey.recoverykey.toJSON())
@@ -189,7 +189,7 @@ export default {
 
         })
       })
-
+      this.saveTolocalstorage()
     },
     recoveryByJson() {
       // decrypt part
@@ -335,7 +335,7 @@ export default {
     <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
   </div>
   <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-  <div v-if="this.initpage == 1">
+  <!-- <div v-if="this.initpage == 1">
     <button @click="genprivKey">genprivKey</button><br>
     <button @click="recovery">recovery</button><br>
   </div>
@@ -372,4 +372,5 @@ export default {
   <div>
 
   </div>
-</div></template>
+</div> -->
+</template>

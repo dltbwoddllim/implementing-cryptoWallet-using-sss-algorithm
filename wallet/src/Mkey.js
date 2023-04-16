@@ -42,6 +42,7 @@ export class manageKey {
     recoveryPrivateKey(point_1, point_2) {
         const co = (point_1.Y.sub(point_2.Y)).div(point_1.X.sub(point_2.X))
         this.recoverykey = point_1.Y.sub(co.mul(point_1.X))
+        this.privateKey = this.recoverykey
         return this.recoverykey
     }
 
