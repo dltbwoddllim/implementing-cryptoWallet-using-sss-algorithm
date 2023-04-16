@@ -9,6 +9,7 @@ const myMkey = new manageKey();
 const myencryptItem = new encryptItem();
 const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
 
+// this.pageIndex = 'init'
 var initpage = 0
 if (localStorage.getItem('encryptDatas') == null) {
   initpage = 1;
@@ -30,12 +31,18 @@ export default {
       ethbalance: 0,
       address: "",
       recoveryJsonFile: "",
-      amount:0,
-      toAddress : "",
-      pageIndex : ""
+      amount: 0,
+      toAddress: "",
+      pageIndex: "init"
     }
   },
   methods: {
+    page(index) {
+      this.pageIndex = index
+      if (index == 'home') {
+        this.getAddress();
+      }
+    },
     genprivKey() {
       myMkey.genPrivateKey()
       this.privateKey = myMkey.privateKey.toJSON()
@@ -51,7 +58,7 @@ export default {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
       this.initpage = 3
     },
-    inputValuePasstest(){
+    inputValuePasstest() {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
     },
     inputPwPass() {
@@ -66,10 +73,10 @@ export default {
     onInput(e) {
       this.point_3_x = e.target.value
     },
-    onAmount(e){
+    onAmount(e) {
       this.amount = e.target.value
     },
-    ontoAddress(e){
+    ontoAddress(e) {
       this.toAddress = e.target.value
 
     },
@@ -272,36 +279,70 @@ export default {
 <template>
   <div v-if="this.pageIndex == 'init'">
     <!-- 개인키 생성, 로컬 스토리지, josn 선택 -->
-    <button @click="page">genprivKey</button><br>
+    <button @click="page('genprivateKey')">genprivKey</button><br>
+    <button @click="page('RecoveryBylocalStorage')">RecoveryBylocalStorage</button><br>
+    <button @click="page('RecoveryByJson')">RecoveryByJson</button><br>
 
   </div>
   <!-- 개인키 생성 -->
   <div v-else-if="this.pageIndex == 'genprivateKey'">
     <!-- 개인키 생성 버튼
-        point3_x 입력
-        비밀번호 입력 -->
+          point3_x 입력 버튼
+          비밀번호 입력 버튼
+        리커버리 파일 제공
+      gotohome 버튼-->
+    <button @click="genprivKey">genprivKey</button><br>
+    <button @click="genPoints">genPoints</button><br>
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
+      @click="inputValuePass">onInput</button><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
+      @click="inputPwPass">onPassword</button><br>
+    <button @click="pointJsonData">복구 데이터 생성</button>
+    {{ jsonfile }}
+    <button @click="page('home')">wallet</button><br>
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryBylocalStorage'">
-  <!-- 
-    비밀번호 입력
-   -->
+    <!-- 
+      비밀번호 입력
+      gotohome 버튼
+     -->
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
+      @click="inputPwPass">onPassword</button><br>
+    <button @click="attatchFromlocalstorage">로그인</button><br>
+    <button @click="page('home')">wallet</button><br>
+
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryByJson'">
-  <!-- 
-    point3_x
-    비밀번호
-    json입력
-   -->
+    <!-- 
+      point3_x
+      비밀번호
+      json입력
+      gotohome 버튼
+     -->
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
+      @click="inputValuePasstest">onInput</button><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
+      @click="inputPwPass">onPassword</button><br>
+    <input :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
+    <button @click="recoveryByJson">recoveryByJson</button><br>
+    <button @click="page('home')">wallet</button><br>
   </div>
-  <div v-else-if="this.pageIndex == 'home'"></div>
-
+  <div v-else-if="this.pageIndex == 'home'">
+    <!-- 주소, 보유량, 보낼 주소, send, send 결과 -->
+    <p>주소 : {{ address }}</p>
+    <p>eth : {{ ethbalance }}</p>
+    <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
+    <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
+  </div>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
   <div v-if="this.initpage == 1">
     <button @click="genprivKey">genprivKey</button><br>
     <button @click="recovery">recovery</button><br>
   </div>
   <div v-else-if="this.initpage == 2">
     <button @click="genPoints">genPoints</button><br>
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button @click="inputValuePass">onInput</button><br>
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
+      @click="inputValuePass">onInput</button><br>
   </div>
   <div v-else-if="this.initpage == 3">
     <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><br>
@@ -313,8 +354,10 @@ export default {
     <button @click="goTohome">goTohome</button>
   </div>
   <div v-else-if="this.initpage == 5">
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button @click="inputValuePasstest">onInput</button><br>
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button @click="inputPwPass">onPassword</button><br>
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
+      @click="inputValuePasstest">onInput</button><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
+      @click="inputPwPass">onPassword</button><br>
     <input :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
     <button @click="recoveryByJson">recoveryByJson</button><br>
     <button @click="goTohome">goTohome</button>
@@ -325,9 +368,8 @@ export default {
     <p>주소 : {{ address }}</p>
     <p>eth : {{ ethbalance }}</p>
     <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
-    <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
-    <div>
+  <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
+  <div>
 
-    </div>
   </div>
-</template>
+</div></template>
