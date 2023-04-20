@@ -9,7 +9,6 @@ const myMkey = new manageKey();
 const myencryptItem = new encryptItem();
 const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
 
-// this.pageIndex = 'init'
 var initpage = 0
 if (localStorage.getItem('encryptDatas') == null) {
   initpage = 1;
@@ -51,9 +50,6 @@ export default {
     genPoints() {
       myMkey.genPoints()
     },
-    recovery() {
-      this.initpage = 5;
-    },
     inputValuePass() {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
       this.initpage = 3
@@ -63,12 +59,6 @@ export default {
     },
     inputPwPass() {
       myencryptItem.setPassword(this.password);
-      // if (this.initpage == 5) {
-      //   this.attatchFromlocalstorage()
-      // } else {
-      //   this.saveTolocalstorage();
-      //   this.initpage = 4
-      // }
     },
     onInput(e) {
       this.point_3_x = e.target.value
@@ -86,7 +76,6 @@ export default {
     onrecoveryJsonFile(e) {
       this.recoveryJsonFile = e.target.value
     },
-
     saveTolocalstorage() {
       myencryptItem.encrypt(myMkey.privateKey).then((result) => {
         const encryptDatas = {
@@ -142,11 +131,9 @@ export default {
         encryptDatas['point_3_Y'] = points[2];
         const serializedData = JSON.stringify(encryptDatas)
         this.jsonfile = serializedData
-        console.log(this.jsonfile)
 
         // decrypt part
         const encryptDatass = JSON.parse(this.jsonfile);
-        console.log(encryptDatass)
         var uint8Arr1 = new Uint8Array(Object.keys(encryptDatass.iv).length);
         var uint8Arr2 = new Uint8Array(Object.keys(encryptDatass.salt).length);
         var uint8Arr3 = new Uint8Array(Object.keys(encryptDatass.point_2_X).length);
@@ -169,24 +156,13 @@ export default {
           uint8Arr5[p] = encryptDatass.point_3_Y[p]
         }
 
-        console.log(uint8Arr3)
-        console.log(uint8Arr4)
-        console.log(uint8Arr5)
-
         myencryptItem.iv = uint8Arr1
         myencryptItem.salt = uint8Arr2
         myencryptItem.decryptBatch([uint8Arr3, uint8Arr4, uint8Arr5]).then((results) => {
-          console.log(results);
           myMkey.point_2.X = new BN(results[0])
           myMkey.point_2.Y = new BN(results[1])
           myMkey.point_3.Y = new BN(results[2])
-          console.log(myMkey.point_2.X)
-          console.log(myMkey.point_2.Y)
-          console.log(myMkey.point_3.Y)
           myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
-          console.log(myMkey.recoverykey.toJSON())
-          console.log(myMkey.privateKey.toJSON())
-
         })
       })
       this.saveTolocalstorage()
@@ -220,18 +196,10 @@ export default {
       myencryptItem.iv = uint8Arr1
       myencryptItem.salt = uint8Arr2
       myencryptItem.decryptBatch([uint8Arr3, uint8Arr4, uint8Arr5]).then((results) => {
-        console.log(results);
         myMkey.point_2.X = new BN(results[0])
         myMkey.point_2.Y = new BN(results[1])
         myMkey.point_3.Y = new BN(results[2])
-        console.log(myMkey.point_2.X)
-        console.log(myMkey.point_2.Y)
-        console.log(myMkey.point_3.X)
-        console.log(myMkey.point_3.Y)
         myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
-        console.log(myMkey.recoverykey.toJSON())
-        console.log(myMkey.privateKey.toJSON())
-
       })
     },
     goTohome() {
@@ -260,19 +228,6 @@ export default {
       const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
       console.log('Transaction receipt:', txReceipt);
     }
-    // encryptPoint() {
-    //   myencryptItem.encrypt(myMkey.point_1.X).then((result) => {
-    //     this.cypherPoint = result
-    //     return (this.cypherPoint)
-    //   })
-    // },
-    // decryptPoint() {
-    //   myencryptItem.setPassword(this.password_2);
-    //   myencryptItem.decrypt(this.cypherPoint).then((result) => {
-    //     console.log(result);
-    //     myMkey.privateKey = result;
-    //   });
-    // },
   }
 }
 </script>
@@ -284,13 +239,7 @@ export default {
     <button @click="page('RecoveryByJson')">RecoveryByJson</button><br>
 
   </div>
-  <!-- 개인키 생성 -->
   <div v-else-if="this.pageIndex == 'genprivateKey'">
-    <!-- 개인키 생성 버튼
-          point3_x 입력 버튼
-          비밀번호 입력 버튼
-        리커버리 파일 제공
-      gotohome 버튼-->
     <button @click="genprivKey">genprivKey</button><br>
     <button @click="genPoints">genPoints</button><br>
     <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
@@ -302,10 +251,6 @@ export default {
     <button @click="page('home')">wallet</button><br>
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryBylocalStorage'">
-    <!-- 
-      비밀번호 입력
-      gotohome 버튼
-     -->
     <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
       @click="inputPwPass">onPassword</button><br>
     <button @click="attatchFromlocalstorage">로그인</button><br>
@@ -313,12 +258,6 @@ export default {
 
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryByJson'">
-    <!-- 
-      point3_x
-      비밀번호
-      json입력
-      gotohome 버튼
-     -->
     <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
       @click="inputValuePasstest">onInput</button><br>
     <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
@@ -334,43 +273,4 @@ export default {
     <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
     <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
   </div>
-  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-  <!-- <div v-if="this.initpage == 1">
-    <button @click="genprivKey">genprivKey</button><br>
-    <button @click="recovery">recovery</button><br>
-  </div>
-  <div v-else-if="this.initpage == 2">
-    <button @click="genPoints">genPoints</button><br>
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
-      @click="inputValuePass">onInput</button><br>
-  </div>
-  <div v-else-if="this.initpage == 3">
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><br>
-    <button @click="inputPwPass">onPassword</button><br>
-  </div>
-  <div v-else-if="this.initpage == 4">
-    <button @click="pointJsonData">복구 데이터 생성</button>
-    {{ jsonfile }}
-    <button @click="goTohome">goTohome</button>
-  </div>
-  <div v-else-if="this.initpage == 5">
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
-      @click="inputValuePasstest">onInput</button><br>
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
-      @click="inputPwPass">onPassword</button><br>
-    <input :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
-    <button @click="recoveryByJson">recoveryByJson</button><br>
-    <button @click="goTohome">goTohome</button>
-
-  </div>
-
-  <div v-else>
-    <p>주소 : {{ address }}</p>
-    <p>eth : {{ ethbalance }}</p>
-    <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
-  <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
-  <div>
-
-  </div>
-</div> -->
 </template>
