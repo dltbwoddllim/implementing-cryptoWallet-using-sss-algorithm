@@ -234,9 +234,10 @@ export default {
 <template>
   <div v-if="this.pageIndex == 'init'">
     <!-- 개인키 생성, 로컬 스토리지, josn 선택 -->
-    <button @click="page('genprivateKey')">genprivKey</button><br>
-    <button @click="page('RecoveryBylocalStorage')">RecoveryBylocalStorage</button><br>
-    <button @click="page('RecoveryByJson')">RecoveryByJson</button><br>
+    안녕하세요! <br>
+    <v-btn color="pink" dark @click="page('genprivateKey')">genprivKey</v-btn><br>
+    <v-btn color="primary" dark @click="page('RecoveryBylocalStorage')">RecoveryBylocalStorage</v-btn><br>
+    <v-btn @click="page('RecoveryByJson')">RecoveryByJson</v-btn><br>
 
   </div>
   <div v-else-if="this.pageIndex == 'genprivateKey'">
