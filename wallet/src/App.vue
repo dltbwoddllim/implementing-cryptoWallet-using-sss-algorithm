@@ -9,12 +9,13 @@ const myMkey = new manageKey();
 const myencryptItem = new encryptItem();
 const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
 
-var initpage = 0
-if (localStorage.getItem('encryptDatas') == null) {
-  initpage = 1;
-} else {
-  initpage = 5;
-}
+// var pageIndex;
+// if (localStorage.getItem('encryptDatas') == null) {
+//   pageIndex = 'init';
+// } else {
+//   pageIndex = 'RecoveryBylocalStorage';
+//   console.log(pageIndex);
+// }
 
 export default {
   components: {},
@@ -25,7 +26,6 @@ export default {
       password_2: "",
       cypherPoint: "",
       privateKey: "",
-      initpage: initpage,
       jsonfile: "",
       ethbalance: 0,
       address: "",
@@ -45,14 +45,12 @@ export default {
     genprivKey() {
       myMkey.genPrivateKey()
       this.privateKey = myMkey.privateKey.toJSON()
-      this.initpage = 2;
     },
     genPoints() {
       myMkey.genPoints()
     },
     inputValuePass() {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
-      this.initpage = 3
     },
     inputValuePasstest() {
       myMkey.userPoint_xInputGenerateY(this.point_3_x);
@@ -203,7 +201,6 @@ export default {
       })
     },
     goTohome() {
-      this.initpage = 6;
       this.getAddress();
     },
     async getAddress() {
@@ -233,11 +230,19 @@ export default {
 </script>
 <template>
   <div v-if="this.pageIndex == 'init'">
-    <!-- 개인키 생성, 로컬 스토리지, josn 선택 -->
-    안녕하세요! <br>
-    <v-btn color="pink" dark @click="page('genprivateKey')">genprivKey</v-btn><br>
-    <v-btn color="primary" dark @click="page('RecoveryBylocalStorage')">RecoveryBylocalStorage</v-btn><br>
-    <v-btn @click="page('RecoveryByJson')">RecoveryByJson</v-btn><br>
+  <div class="container" style="margin-top: 100px;">
+    <p class="guide">지갑을 처음 사용하신다면 아래 버튼을 눌러주세요!</p>
+    <v-btn class="buttonSize" @click="page('genprivateKey')">개인키 생성하기</v-btn><br>
+  </div>
+  <div class="container">
+    <p class="guide">해당 기기에서 생성된 계정을 사용하려면 아래 버튼을 눌러주세요!</p>
+    <v-btn class="buttonSize" @click="page('RecoveryBylocalStorage')">비밀번호 입력하기</v-btn><br>
+  </div>
+    <div class="container">
+      <p class="guide">리커버리 파일로 복원하려면 아래 버튼을 눌러주세요!</p>
+      <v-btn  class="buttonSize" @click="page('RecoveryByJson')">리커버리 파일로 복원하기</v-btn><br>
+  </div>
+
 
   </div>
   <div v-else-if="this.pageIndex == 'genprivateKey'">
@@ -275,3 +280,21 @@ export default {
     <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
   </div>
 </template>
+
+<style>
+.buttonSize {
+  width: 400px;
+  height: 50px;
+}
+.container{
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.guide{
+  margin-bottom: 10px;
+}
+
+</style>
