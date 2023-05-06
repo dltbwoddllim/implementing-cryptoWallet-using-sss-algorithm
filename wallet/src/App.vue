@@ -4,18 +4,11 @@ import BN from 'bn.js';
 import { manageKey } from './Mkey.js';
 import { encryptItem } from './encryptItem.js'
 import Web3 from 'web3';
+import * as FileSaver from 'file-saver';
 
 const myMkey = new manageKey();
 const myencryptItem = new encryptItem();
 const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/0218ff73aa344036a2c39f38030f9939'));
-
-// var pageIndex;
-// if (localStorage.getItem('encryptDatas') == null) {
-//   pageIndex = 'init';
-// } else {
-//   pageIndex = 'RecoveryBylocalStorage';
-//   console.log(pageIndex);
-// }
 
 export default {
   components: {},
@@ -72,7 +65,15 @@ export default {
       this.password = e.target.value
     },
     onrecoveryJsonFile(e) {
-      this.recoveryJsonFile = e.target.value
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const data = JSON.parse(reader.result);
+        console.log(data);
+        this.recoveryJsonFile = data;
+        // Do something with the parsed JSON data
+      };
+      reader.readAsText(file);
     },
     saveTolocalstorage() {
       myencryptItem.encrypt(myMkey.privateKey).then((result) => {
@@ -161,13 +162,14 @@ export default {
           myMkey.point_2.Y = new BN(results[1])
           myMkey.point_3.Y = new BN(results[2])
           myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
+        }).then(()=>{
+          localStorage.setItem('data', serializedData);
         })
       })
       this.saveTolocalstorage()
     },
     recoveryByJson() {
-      // decrypt part
-      const encryptDatass = JSON.parse(this.recoveryJsonFile);
+      const encryptDatass = this.recoveryJsonFile;
       console.log(encryptDatass)
       var uint8Arr1 = new Uint8Array(Object.keys(encryptDatass.iv).length);
       var uint8Arr2 = new Uint8Array(Object.keys(encryptDatass.salt).length);
@@ -200,9 +202,6 @@ export default {
         myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
       })
     },
-    goTohome() {
-      this.getAddress();
-    },
     async getAddress() {
       const account = web3.eth.accounts.privateKeyToAccount(myMkey.privateKey.toJSON());
       this.address = account.address;
@@ -224,6 +223,11 @@ export default {
       const signedTx = await web3.eth.accounts.signTransaction(txData, myMkey.privateKey.toJSON());
       const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
       console.log('Transaction receipt:', txReceipt);
+    },
+    downloadData(){
+      const data = localStorage.getItem('data'); // Replace 'my-data' with your own key
+      const blob = new Blob([data], { type: 'application/json' });
+      FileSaver.saveAs(blob, 'data.json');
     }
   }
 }
@@ -254,6 +258,7 @@ export default {
       @click="inputPwPass">onPassword</button><br>
     <button @click="pointJsonData">복구 데이터 생성</button>
     {{ jsonfile }}
+    <v-btn class="buttonSize" @click="downloadData()"> 복구 데이터 다운로드</v-btn><br>
     <button @click="page('home')">wallet</button><br>
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryBylocalStorage'">
@@ -268,7 +273,7 @@ export default {
       @click="inputValuePasstest">onInput</button><br>
     <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
       @click="inputPwPass">onPassword</button><br>
-    <input :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
+    <input type="file" :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
     <button @click="recoveryByJson">recoveryByJson</button><br>
     <button @click="page('home')">wallet</button><br>
   </div>
