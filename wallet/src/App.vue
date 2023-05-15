@@ -70,10 +70,16 @@ export default {
       reader.onload = () => {
         const data = JSON.parse(reader.result);
         console.log(data);
+        console.log(1000)
         this.recoveryJsonFile = data;
-        // Do something with the parsed JSON data
+        console.log(1000)
+        console.log(this.recoveryJsonFile);
+
       };
+      console.log(this.recoveryJsonFile);
       reader.readAsText(file);
+      console.log(1000)
+
     },
     saveTolocalstorage() {
       myencryptItem.encrypt(myMkey.privateKey).then((result) => {
@@ -162,7 +168,7 @@ export default {
           myMkey.point_2.Y = new BN(results[1])
           myMkey.point_3.Y = new BN(results[2])
           myMkey.recoveryPrivateKey(myMkey.point_2, myMkey.point_3);
-        }).then(()=>{
+        }).then(() => {
           localStorage.setItem('data', serializedData);
         })
       })
@@ -224,7 +230,7 @@ export default {
       const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
       console.log('Transaction receipt:', txReceipt);
     },
-    downloadData(){
+    downloadData() {
       const data = localStorage.getItem('data'); // Replace 'my-data' with your own key
       const blob = new Blob([data], { type: 'application/json' });
       FileSaver.saveAs(blob, 'data.json');
@@ -234,55 +240,54 @@ export default {
 </script>
 <template>
   <div v-if="this.pageIndex == 'init'">
-  <div class="container" style="margin-top: 100px;">
-    <p class="guide">지갑을 처음 사용하신다면 아래 버튼을 눌러주세요!</p>
-    <v-btn class="buttonSize" @click="page('genprivateKey')">개인키 생성하기</v-btn><br>
-  </div>
-  <div class="container">
-    <p class="guide">해당 기기에서 생성된 계정을 사용하려면 아래 버튼을 눌러주세요!</p>
-    <v-btn class="buttonSize" @click="page('RecoveryBylocalStorage')">비밀번호 입력하기</v-btn><br>
-  </div>
+    <div class="container" style="margin-top: 100px;">
+      <p class="guide">지갑을 처음 사용하신다면 아래 버튼을 눌러주세요!</p>
+      <v-btn class="buttonSize" @click="page('genprivateKey')">개인키 생성하기</v-btn><br>
+    </div>
+    <div class="container">
+      <p class="guide">해당 기기에서 생성된 계정을 사용하려면 아래 버튼을 눌러주세요!</p>
+      <v-btn class="buttonSize" @click="page('RecoveryBylocalStorage')">비밀번호 입력하기</v-btn><br>
+    </div>
     <div class="container">
       <p class="guide">리커버리 파일로 복원하려면 아래 버튼을 눌러주세요!</p>
-      <v-btn  class="buttonSize" @click="page('RecoveryByJson')">리커버리 파일로 복원하기</v-btn><br>
-  </div>
+      <v-btn class="buttonSize" @click="page('RecoveryByJson')">리커버리 파일로 복원하기</v-btn><br>
+    </div>
 
 
   </div>
   <div v-else-if="this.pageIndex == 'genprivateKey'">
-    <button @click="genprivKey">genprivKey</button><br>
-    <button @click="genPoints">genPoints</button><br>
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
-      @click="inputValuePass">onInput</button><br>
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
-      @click="inputPwPass">onPassword</button><br>
-    <button @click="pointJsonData">복구 데이터 생성</button>
-    {{ jsonfile }}
-    <v-btn class="buttonSize" @click="downloadData()"> 복구 데이터 다운로드</v-btn><br>
-    <button @click="page('home')">wallet</button><br>
+    <v-btn class="buttonSize" @click="genprivKey">genprivKey</v-btn><br>
+    <v-btn class="buttonSize" style="margin-top: 10px;" @click="genPoints">genPoints</v-btn><br>
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><v-btn class="buttonSize2"
+      style="margin-top: 10px;" @click="inputValuePass">onInput</v-btn><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><v-btn class="buttonSize2"
+      style="margin-top: 10px;" @click="inputPwPass">onPassword</v-btn><br>
+    <v-btn class="buttonSize" style="margin-top: 10px;" @click="pointJsonData">복구 데이터 생성</v-btn><br>
+    <v-btn class="buttonSize" style="margin-top: 10px;" @click="downloadData()"> 복구 데이터 다운로드</v-btn><br>
+    <v-btn class="buttonSize2" style="margin-top: 10px;" @click="page('home')">complete!</v-btn><br>
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryBylocalStorage'">
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
-      @click="inputPwPass">onPassword</button><br>
-    <button @click="attatchFromlocalstorage">로그인</button><br>
-    <button @click="page('home')">wallet</button><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><v-btn class="buttonSize2" style="margin-top: 10px;"
+      @click="inputPwPass">onPassword</v-btn><br>
+    <v-btn class="buttonSize2" style="margin-top: 10px;" @click="attatchFromlocalstorage">로그인</v-btn><br>
+    <v-btn class="buttonSize2" style="margin-top: 10px;" @click="page('home')">complete!</v-btn><br>
 
   </div>
   <div v-else-if="this.pageIndex == 'RecoveryByJson'">
-    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><button
-      @click="inputValuePasstest">onInput</button><br>
-    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><button
-      @click="inputPwPass">onPassword</button><br>
-    <input type="file" :value="recoveryJsonFile" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
-    <button @click="recoveryByJson">recoveryByJson</button><br>
-    <button @click="page('home')">wallet</button><br>
+    <input :value="point_3_x" @input="onInput" placeholder="point3x입력"><v-btn class="buttonSize2" style="margin-top: 10px;"
+      @click="inputValuePasstest">onInput</v-btn><br>
+    <input :value="password" @input="onPassword" placeholder="비밀번호 입력"><v-btn class="buttonSize2" style="margin-top: 10px;"
+      @click="inputPwPass">onPassword</v-btn><br>
+    <input type="file" @input="onrecoveryJsonFile" placeholder="json 입력"><br>
+    <v-btn class="buttonSize2" style="margin-top: 10px;" @click="recoveryByJson">recoveryByFile</v-btn><br>
+    <v-btn class="buttonSize2" style="margin-top: 10px;" @click="page('home')">complete!</v-btn><br>
   </div>
   <div v-else-if="this.pageIndex == 'home'">
     <!-- 주소, 보유량, 보낼 주소, send, send 결과 -->
     <p>주소 : {{ address }}</p>
     <p>eth : {{ ethbalance }}</p>
     <input :value="toAddress" @input="ontoAddress" placeholder="toAddress"><br>
-    <input :value="amount" @input="onAmount" placeholder="amount"><button @click="sendTx">sendTx</button>
+    <input :value="amount" @input="onAmount" placeholder="amount"><v-btn class="buttonSize2" style="margin-top: 10px;" @click="sendTx">sendTx</v-btn>
   </div>
 </template>
 
@@ -291,15 +296,21 @@ export default {
   width: 400px;
   height: 50px;
 }
-.container{
+
+.buttonSize2 {
+  width: 150px;
+  height: 50px;
+}
+
+.container {
   height: 100px;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
 }
-.guide{
+
+.guide {
   margin-bottom: 10px;
 }
-
 </style>
